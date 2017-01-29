@@ -1,0 +1,5 @@
+http://central.maven.org/maven2/com/jcraft/jsch/0.1.54/jsch-0.1.54.jar
+https://www.facebook.com/index.php
+ftp://mirror.liquidtelecom.com/centos/HEADER.html
+ftp://mirror.liquidtelecom.com/centos/timestamp.txt
+ftp://mirror.liquidtelecom.com/centos/timestamp333.txt
