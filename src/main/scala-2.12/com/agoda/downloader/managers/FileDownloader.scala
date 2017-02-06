@@ -1,7 +1,9 @@
-package com.agoda.filedownloader
+package com.agoda.filedownloader.downloaders
 
 import java.io.{File, FileOutputStream, InputStream}
 import java.nio.file.{FileAlreadyExistsException, NoSuchFileException, NotDirectoryException}
+
+import com.agoda.filedownloader.streaming.StreamProvider
 
 /**
   * Created by Abdelrahman Mohamed Sayed on 1/26/17.
@@ -14,7 +16,7 @@ class FileDownloader {
     *
     * remoteFileURL     remote file url
     *
-    * @param connectionStream  connectionStream to manage connection and retrieve input stream
+    * @param fileURL           file url
     * @param downloadDirectory download directory
     * @param localFileName     new file name in the download directory
     * @param overwrite         overwrite file if exist in local directory
@@ -24,10 +26,11 @@ class FileDownloader {
     * @throws NoSuchFileException   if file doesn't exist in remote
     **/
 
-  def downloadFile(connectionStream: ConnectionStream, downloadDirectory: String, localFileName: String, overwrite: Boolean, bufferSize: Int): Boolean = {
+  def downloadFile(fileURL: String, downloadDirectory: String, localFileName: String, overwrite: Boolean, bufferSize: Int): Boolean = {
     if (bufferSize < 1)
       throw new IllegalArgumentException("buffer size should be greater than 0")
-    connectionStream.openConnection()
+    val connectionStream = StreamProvider.getStream(fileURL.substring(0, fileURL.indexOf("://")))
+    connectionStream.openConnection(fileURL)
     val downloaded = if (connectionStream.exists()) {
       val inputStream = connectionStream.getOpenInputStream
       val fileName: String = if (localFileName == null) {

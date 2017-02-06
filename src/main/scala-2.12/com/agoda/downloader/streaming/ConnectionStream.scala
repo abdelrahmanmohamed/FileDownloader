@@ -1,4 +1,4 @@
-package com.agoda.filedownloader
+package com.agoda.filedownloader.streaming
 
 import java.io.InputStream
 
@@ -6,13 +6,13 @@ import java.io.InputStream
   * Created by Abdelrahman Sayed on 1/28/17.
   */
 trait ConnectionStream {
-  def openConnection()
+  def openConnection(fileURL: String)
 
   def getOpenInputStream: InputStream
 
   def exists(): Boolean
 
-  def getFileName:String
+  def getFileName: String
 
   def closeConnection()
 }

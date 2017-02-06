@@ -1,4 +1,0 @@
-Todo List:
-1- Design Document
-2- Sequence Diagram
-3- Docker Image
