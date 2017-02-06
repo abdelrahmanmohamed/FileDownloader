@@ -1,11 +1,11 @@
-package com.agoda.filedownloader
+package com.agoda.downloader
 
 import java.io.File
 import java.net.{Authenticator, InetAddress, PasswordAuthentication, URL}
 import java.util.Scanner
 import java.util.concurrent.{Executors, TimeUnit}
 
-import com.agoda.filedownloader.downloaders.FileDownloadManager
+import com.agoda.downloader.managers.FileDownloadManager
 import org.slf4j.LoggerFactory
 
 /**

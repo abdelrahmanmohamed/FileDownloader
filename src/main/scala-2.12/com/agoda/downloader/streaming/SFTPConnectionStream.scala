@@ -1,7 +1,7 @@
-package com.agoda.filedownloader.streaming
+package com.agoda.downloader.streaming
 
 import java.io.InputStream
-import java.net.URL
+import java.net.{URL, URLConnection}
 import java.nio.file.Files
 import java.util.Collections
 
@@ -46,5 +46,9 @@ class SFTPConnectionStream() extends ConnectionStream {
 
   override def getFileName: String = {
     remotePath.getFileName.toString
+  }
+
+  override def getContentLength: Long = {
+    Files.size(remotePath)
   }
 }

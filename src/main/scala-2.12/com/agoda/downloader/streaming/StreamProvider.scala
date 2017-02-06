@@ -1,4 +1,4 @@
-package com.agoda.filedownloader.streaming
+package com.agoda.downloader.streaming
 
 import java.io.{File, FileInputStream}
 import java.util
@@ -14,20 +14,20 @@ object StreamProvider {
   val pattern = "ConnectionStream"
   val logger = LoggerFactory.getLogger(getClass)
 
-  private def find(protocol: String): util.ArrayList[String] = {
+  private def find(protocol: String): String = {
     val paths = System.getProperty("java.class.path").split(":")
     val protocolAlias = if (protocol.equalsIgnoreCase("https")) "http" else protocol
-    var list = new util.ArrayList[String]();
     paths.foreach { path =>
       logger.debug(path)
-      list.addAll(find(protocolAlias, path))
+      val returnClass = find(protocolAlias, path)
+      if (returnClass != null)
+        return returnClass
     }
-    list
+    return null
   }
 
-  private def find(protocol: String, path: String): util.ArrayList[String] = {
+  private def find(protocol: String, path: String): String = {
     val directory = new File(path)
-    var list = new util.ArrayList[String]();
     if (directory.exists() && directory.isDirectory) {
       val files = directory.list();
       files.foreach { file =>
@@ -39,24 +39,26 @@ object StreamProvider {
           if (classname.equalsIgnoreCase(protocol + pattern)) {
             val classPath = dir.replace(File.separator, ".") + "." + classname
             if (classOf[ConnectionStream].isAssignableFrom(Class.forName(classPath))) {
-              list.add(classPath)
+              return classPath
             }
           }
-        }
-        else {
+        } else {
           val dir = directory + File.separator + file
-          list.addAll(find(protocol, dir))
+          val returnedClass = find(protocol, dir)
+          if (returnedClass != null)
+            return returnedClass
         }
       }
     }
     else if (path.endsWith(".jar")) {
-      list.addAll(scanJars(path, protocol))
+      val returnedClass = scanJars(path, protocol)
+      if (returnedClass != null)
+        return returnedClass
     }
-    return list
+    return null
   }
 
-  private def scanJars(jarPath: String, protocol: String): util.ArrayList[String] = {
-    val classNames = new util.ArrayList[String]();
+  private def scanJars(jarPath: String, protocol: String): String = {
     val zip = new ZipInputStream(new FileInputStream(jarPath));
     var entry: ZipEntry = zip.getNextEntry
     while (entry != null) {
@@ -65,18 +67,18 @@ object StreamProvider {
         val className = entryPath.replace('/', '.');
         val classPath = className.substring(0, className.length() - ".class".length())
         if (classOf[ConnectionStream].isAssignableFrom(Class.forName(classPath)))
-          classNames.add(classPath);
+          return classPath;
       }
       entry = zip.getNextEntry
     }
-    classNames
+    return null
   }
 
-  def getStream(protocol: String) = {
-    val list = find(protocol);
-    if (list.size() == 0)
+  def getStream(protocol: String): ConnectionStream = {
+    val returnedClass = find(protocol);
+    if (returnedClass == null)
       throw new ClassNotFoundException("No implementation found for protocol".concat(protocol) + ",Implement com.agoda.ConnectionStream")
     else
-      Class.forName(list.get(0)).newInstance().asInstanceOf[ConnectionStream];
+      return Class.forName(returnedClass).newInstance().asInstanceOf[ConnectionStream];
   }
 }

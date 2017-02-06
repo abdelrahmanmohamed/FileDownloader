@@ -1,4 +1,4 @@
-package com.agoda.filedownloader.streaming
+package com.agoda.downloader.streaming
 
 import java.io.InputStream
 
@@ -13,6 +13,8 @@ trait ConnectionStream {
   def exists(): Boolean
 
   def getFileName: String
+
+  def getContentLength: Long
 
   def closeConnection()
 }

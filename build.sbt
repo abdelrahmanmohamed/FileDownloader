@@ -4,6 +4,8 @@ version := "1.0"
 
 scalaVersion := "2.12.1"
 
+mainClass in(Compile, run) := Some("com.agoda.filedownloader.Application")
+
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.22"
 
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.22"
@@ -17,3 +19,5 @@ libraryDependencies += "junit-addons" % "junit-addons" % "1.4" % "test"
 libraryDependencies += "org.apache.sshd" % "sshd-core" % "1.3.0"
 
 parallelExecution in ThisBuild := false
+
+fork in Test := true

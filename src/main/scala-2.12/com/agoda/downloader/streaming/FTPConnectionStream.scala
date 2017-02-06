@@ -1,4 +1,4 @@
-package com.agoda.filedownloader.streaming
+package com.agoda.downloader.streaming
 
 import java.io.{FileNotFoundException, InputStream}
 import java.net._
@@ -48,6 +48,10 @@ class FTPConnectionStream() extends ConnectionStream {
 
   override def getFileName: String = {
     fileURL.substring(fileURL.lastIndexOf("/") + 1, fileURL.length())
+  }
+
+  override def getContentLength: Long = {
+    uRLConnection.getContentLengthLong()
   }
 }
 

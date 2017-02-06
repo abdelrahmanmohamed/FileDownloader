@@ -1,4 +1,4 @@
-package com.agoda.filedownloader.downloaders
+package com.agoda.downloader.managers
 
 import java.io.File
 import java.util.Scanner
@@ -20,22 +20,8 @@ class FileDownloadManager(val inputFileName: String, val downloadDir: String,
     val inFile = new File(inputFileName)
     val inScanner = new Scanner(inFile)
     while (inScanner.hasNext) {
-      try {
-        val url = inScanner.nextLine()
-        logger.info("Downloading : {}", url)
-        executor.execute(() => {
-          try {
-            val d = new FileDownloader()
-            d.downloadFile(url, downloadDir, null, overwrite, bufferSize)
-            logger.info("Done downloading: {}", url)
-          } catch {
-            case _: Exception => logger.info("Can't download:{}", url)
-          }
-        })
-      } catch {
-        case ex: Exception =>
-          throw ex
-      }
+      val url = inScanner.nextLine()
+      executor.execute(new DownloadTask(url, downloadDir, null, overwrite, bufferSize))
     }
     inScanner.close()
     executor.shutdown()

@@ -1,9 +1,10 @@
-package com.agoda.filedownloader.downloaders
+package com.agoda.downloader.managers
 
-import java.io.{File, FileOutputStream, InputStream}
+import java.io.{File, FileOutputStream, IOException, InputStream}
 import java.nio.file.{FileAlreadyExistsException, NoSuchFileException, NotDirectoryException}
 
-import com.agoda.filedownloader.streaming.StreamProvider
+import com.agoda.downloader.streaming.StreamProvider
+import org.slf4j.LoggerFactory
 
 /**
   * Created by Abdelrahman Mohamed Sayed on 1/26/17.
@@ -11,6 +12,8 @@ import com.agoda.filedownloader.streaming.StreamProvider
   * uses http basic authentication only
   */
 class FileDownloader {
+  val logger = LoggerFactory.getLogger(getClass)
+
   /**
     * download file from remote with the provided name
     *
@@ -38,7 +41,7 @@ class FileDownloader {
       } else {
         localFileName
       }
-      saveStreamToFile(inputStream, downloadDirectory, fileName, overwrite, bufferSize)
+      saveStreamToFile(inputStream, connectionStream.getContentLength, downloadDirectory, fileName, overwrite, bufferSize)
     } else {
       throw new NoSuchFileException("File doesn't exist in remote")
     }
@@ -46,10 +49,11 @@ class FileDownloader {
     downloaded
   }
 
-  def saveStreamToFile(inputStream: InputStream, downloadDirectory: String, localFileName: String, overwrite: Boolean, bufferSize: Int): Boolean = {
+  private def saveStreamToFile(inputStream: InputStream, fileSize: Long, downloadDirectory: String, localFileName: String, overwrite: Boolean, bufferSize: Int): Boolean = {
     val outDir = new File(downloadDirectory)
     if (outDir.exists() || outDir.mkdirs()) {
       val outFile = new File(downloadDirectory + File.separator + localFileName)
+      var readCount = 0
       if (outFile.exists() && !overwrite) {
         false
       } else if (outFile.exists() || outFile.createNewFile()) {
@@ -57,18 +61,22 @@ class FileDownloader {
           val outputStream = new FileOutputStream(outFile)
           var bytesRead = -1
           val buffer = new Array[Byte](bufferSize)
-          while (inputStream.available() > 0) {
+          while ((fileSize != -1 && readCount < fileSize) || inputStream.available() > 0) {
             bytesRead = inputStream.read(buffer)
             outputStream.write(buffer, 0, bytesRead)
             outputStream.flush()
+            readCount += bytesRead
           }
           outputStream.close()
           inputStream.close()
-          true
+          if (fileSize != -1 && fileSize != readCount)
+            throw new IOException("Connection lost while downloading from remote,original file size:" + fileSize + ",downloaded:" + readCount)
+          else
+            true
         } catch {
           case ex: Exception =>
             outFile.delete()
-            throw ex
+            throw new IOException("Connection lost while downloading from remote,original file size:" + fileSize + ",downloaded:" + readCount)
         }
       } else {
         outFile.delete()

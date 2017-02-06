@@ -1,4 +1,4 @@
-package com.agoda.filedownloader.streaming
+package com.agoda.downloader.streaming
 
 import java.io.InputStream
 import java.net._
@@ -46,5 +46,9 @@ class HttpConnectionStream() extends ConnectionStream {
     } else {
       fileURL.substring(fileURL.lastIndexOf("/") + 1, fileURL.length())
     }
+  }
+
+  override def getContentLength: Long = {
+    uRLConnection.getContentLengthLong
   }
 }
